@@ -9,10 +9,10 @@ router.post('/users', userController.createUser);
 // Ruta para obtener todos los usuarios
 router.get('/users', userController.getUsers);
 
-router.get('/api', (req, res) => {
+// Ruta para el mensaje de bienvenida
+router.get('/', (req, res) => {
     console.log("Ruta /api accesada");
     res.json({ message: 'Bienvenido a la API' });
 });
-
 
 module.exports = router;

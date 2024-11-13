@@ -4,9 +4,9 @@
 const calcularTMB = (peso, altura, edad, genero) => {
 let tmb;
 if (genero === 'masculino') {
-    tmb = 88.36 + (13.4 * peso) + (4.8 * altura) - (5.7 * edad);
+    tmb = (10 * peso) + (6.25 * altura) - (5 * edad) + 5;
 } else {
-    tmb = 447.6 + (9.2 * peso) + (3.1 * altura) - (4.3 * edad);
+    tmb = (10 * peso) + (6.25 * altura) - (5 * edad) - 161;
 }
 return tmb;
 };
@@ -26,39 +26,49 @@ return tmb * factorActividad[nivelActividad];
 // Calcular las calorías objetivo (dependiendo del perfil: mantención, volumen, déficit)
 const calcularCaloriasObjetivo = (tdee, perfil) => {
 if (perfil === 'volumen') {
-    return tdee + 500; // Superávit calórico
+    return tdee * 1.2; // Superávit calórico
 } else if (perfil === 'deficit') {
-    return tdee - 500; // Déficit calórico
+    return tdee * 0.875; // Déficit calórico
 } else {
     return tdee; // Mantenimiento
 }
 };
 
-// Calcular los macronutrientes (proteínas, grasas, carbohidratos) en base a las calorías objetivo y peso
 const calcularMacronutrientes = (peso, caloriasObjetivo, perfil) => {
-let gramosProteinas, caloriasProteinas, gramosGrasas, caloriasGrasas, caloriasRestantes, gramosCarbohidratos;
+    let gramosProteinas, gramosGrasas, gramosCarbohidratos;
+    
+    // Configuración de porcentajes basada en el perfil
+    let porcentajeCarbohidratos, porcentajeProteinas, porcentajeGrasas;
+    
+    if (perfil === 'volumen') {
+        porcentajeCarbohidratos = 0.55;
+        porcentajeProteinas = 0.30;
+        porcentajeGrasas = 0.15;
+    } else if (perfil === 'deficit') {
+        porcentajeCarbohidratos = 0.30;
+        porcentajeProteinas = 0.45;
+        porcentajeGrasas = 0.25;
+    } else if (perfil === 'mantencion') {
+        porcentajeCarbohidratos = 0.45;
+        porcentajeProteinas = 0.35;
+        porcentajeGrasas = 0.20;
+    } else {
+        throw new Error("Perfil no válido. Usa 'volumen', 'deficit' o 'mantencion'.");
+    }
 
-// Calcular la cantidad de proteínas en gramos
-gramosProteinas = 1.925 * peso; // 1.925 g de proteína por kg de peso corporal
-caloriasProteinas = gramosProteinas * 4; // 1 gramo de proteína = 4 calorías
+    // Calcular los macronutrientes en gramos
+    gramosProteinas = (caloriasObjetivo * porcentajeProteinas) / 4; // 1 gramo de proteína = 4 calorías
+    gramosGrasas = (caloriasObjetivo * porcentajeGrasas) / 9; // 1 gramo de grasa = 9 calorías
+    gramosCarbohidratos = (caloriasObjetivo * porcentajeCarbohidratos) / 4; // 1 gramo de carbohidrato = 4 calorías
 
-// Calcular la cantidad de grasas en gramos (25% de calorías)
-gramosGrasas = (caloriasObjetivo * 0.25) / 9; // 1 gramo de grasa = 9 calorías
-caloriasGrasas = gramosGrasas * 9;
-
-// Calcular la cantidad de carbohidratos en gramos con las calorías restantes
-caloriasRestantes = caloriasObjetivo - (caloriasProteinas + caloriasGrasas);
-gramosCarbohidratos = caloriasRestantes / 4; // 1 gramo de carbohidrato = 4 calorías
-
-// Redondear los valores de macronutrientes
-const macronutrientes = {
-    proteinas: Math.round(gramosProteinas),
-    grasas: Math.round(gramosGrasas),
-    carbohidratos: Math.round(gramosCarbohidratos)
+    // Redondear los valores de macronutrientes
+    return {
+        proteinas: Math.round(gramosProteinas),
+        grasas: Math.round(gramosGrasas),
+        carbohidratos: Math.round(gramosCarbohidratos)
+    };
 };
 
-return macronutrientes;
-};
 
 module.exports = { calcularTMB, calcularTDEE, calcularCaloriasObjetivo, calcularMacronutrientes };
 

@@ -1,52 +1,35 @@
 const userModel = require('../models/userModels');
 const utils = require('../utils/utils'); // Importamos las funciones de utilidades
 
+
 // Controlador para crear un nuevo usuario
 const createUser = (req, res) => {
-  
-  //Esta es la data que viene de formData desde el frontend - Va ser necesaria para la creacion del usuario  
+  // Obtener los datos del formulario desde el frontend
   const { email, password, nombre, apellido, edad, peso, altura, genero, perfil, nivelActividad, pais, imagen } = req.body;
 
-  // Dividir los datos en secciones
-  const personalInfo = {
-    nombre,
-    apellido,
-    edad,
-    genero,
-    pais,
-    imagen
-  };
+  // Validación básica de los datos recibidos
+  if (!email || !password || !nombre || !apellido || !edad || !peso || !altura || !genero || !perfil || !nivelActividad || !pais) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+  }
 
-  const healthInfo = {
-    peso,
-    altura,
-    perfil,
-    nivelActividad
-  };
+  // Separar la información en secciones
+  const personalInfo = { nombre, apellido, edad, genero, pais, imagen };
+  const healthInfo = { peso, altura, perfil, nivelActividad };
 
-  // Calcular datos nutricionales utilizando las funciones del archivo utils.js
+  // Calcular datos nutricionales usando las utilidades
   const tmb = utils.calcularTMB(peso, altura, edad, genero);
   const tdee = utils.calcularTDEE(tmb, nivelActividad);
   const caloriasObjetivo = utils.calcularCaloriasObjetivo(tdee, perfil);
-  
-  const macronutrientes = utils.calcularMacronutrientes({ 
-    dataUserNutricional: { caloriasObjetivo }, 
-    dataUser: { peso } 
-  });
+  const macronutrientes = utils.calcularMacronutrientes(peso, caloriasObjetivo, perfil);
 
-  const nutritionInfo = {
-    tmb,
-    tdee,
-    caloriasObjetivo,
-    ...macronutrientes
-  };
+  const nutritionInfo = { tmb, tdee, caloriasObjetivo, ...macronutrientes };
 
   // Crear el usuario en la base de datos
   userModel.createUser(email, password, personalInfo, healthInfo, nutritionInfo, (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error al crear usuario', error: err });
-    }
-    res.status(201).json(result);
+      if (err) {
+          return res.status(500).json({ message: 'Error al crear usuario', error: err });
+      }
+      res.status(201).json(result);
   });
 };
 

@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Usar las rutas de usuario
-app.use('/', userRoutes);
+app.use('/api', userRoutes);
 
 // Probar la conexión a la base de datos con una consulta simple
 db.query('SELECT 1', (err, results) => {
